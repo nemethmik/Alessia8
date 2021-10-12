@@ -7,14 +7,27 @@
     <title>Easy Web Components</title>
 </head>
 <body>
+    <style>
+        button{color:red}
+    </style>
     <script type="text/javascript">
         window.customElements.define("my-counter", class extends HTMLElement {
+            // Shadow DOM operations can be done in constructor but not Light DOM
+            // constructor() {
+            //     super()
+            //     this.attachShadow({mode:"open"})
+            //     this.shadowRoot.innerHTML = "<p>Hello from Shadow DOM</p>"
+            // }
             connectedCallback() {
+                // Ligth DOM operations are not allowed in the constructor
                 this.innerHTML = "<p>My Counter <button>Up</button> </p> "
+                this.attachShadow({mode:"open"})
+                this.shadowRoot.innerHTML = "<p>Hello from <button>Shadow DOM</button></p>"
             }
         })
     </script>
     <h1>Easy Web Components</h1>
+    <button>Button</button>
     <my-counter></my-counter>
 </body>
 </html>
