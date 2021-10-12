@@ -10,30 +10,60 @@
     <style>
         button{color:red}
     </style>
+    <!-- WARNING: slots work only in Shadow DOM-->
+    <template id="my-counter">
+        <p>
+            <slot>Counter</slot> 
+            <span>0</span> 
+            <button><slot name=btn-label>Up</slot></button>
+        </p>
+    </template>
     <script type="text/javascript">
         window.customElements.define("my-counter", class extends HTMLElement {
-            // Shadow DOM operations can be done in constructor but not Light DOM
-            // constructor() {
-            //     super()
-            //     this.attachShadow({mode:"open"})
-            //     this.shadowRoot.innerHTML = "<p>Hello from Shadow DOM</p>"
-            // }
+            static get observedAttributes() { return ["count", "label"]; }
+            root = this
             count = 0
             connectedCallback() {
-                // Ligth DOM operations are not allowed in the constructor
-                //this.innerHTML = "<p>My Counter <button>Up</button> </p> "
-                this.attachShadow({mode:"open"})
-                this.shadowRoot.innerHTML = `<p>Counter <span>${this.count}</span> <button>Up</button></p>`
-                this.shadowRoot.querySelector("button").addEventListener("click",() => {
+                this.root = this.attachShadow({mode:"open"})
+                const template = document.getElementById("my-counter")
+                //console.log("Template",template)
+                if(template) {
+                    this.root.appendChild(template.content.cloneNode(true))
+                } else this.root.innerHTML = `<p>Counter <span>${this.count}</span> <button>Up</button></p>`
+                this.renderCount()
+                this.renderLabel()
+                this.root.querySelector("button").addEventListener("click",() => {
                     this.count++
                     console.log(`Counter ${this.count}`)
-                    this.shadowRoot.querySelector("span").innerText = this.count
+                    this.renderCount()
                 })
+            }
+            attributeChangedCallback(name, oldValue, newValue) {
+                console.log(`attributeChangedCallback: ${name} = ${oldValue} => ${newValue}`)
+                if(name == "count") {
+                    this.count = parseInt(newValue)
+                    this.renderCount()
+                } else if(name == "label") {
+                    this.renderLabel()
+                }
+                // this.count = parseInt(this.getAttribute("count"))                
+            }
+            renderCount() {
+                if(this.root.querySelector("span")) this.root.querySelector("span").innerText = this.count
+            }
+            renderLabel() {
+                if(this.getAttribute("label")) {
+                    if(this.root.querySelector("button")) 
+                        this.root.querySelector("button").innerText = this.getAttribute("label")
+                }
             }
         })
     </script>
     <h1>Easy Web Components</h1>
     <button>Button</button>
-    <my-counter></my-counter>
+    <my-counter count=10>Click to Count<span slot=btn-label>Increment</span></my-counter>
+    <my-counter label="INCR"></my-counter>
+    <my-counter><b>My Counter</b></my-counter>
+    <my-counter><div slot=btn-label>Click Me</div></my-counter>
 </body>
 </html>
