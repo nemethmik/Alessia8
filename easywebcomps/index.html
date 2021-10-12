@@ -18,11 +18,17 @@
             //     this.attachShadow({mode:"open"})
             //     this.shadowRoot.innerHTML = "<p>Hello from Shadow DOM</p>"
             // }
+            count = 0
             connectedCallback() {
                 // Ligth DOM operations are not allowed in the constructor
-                this.innerHTML = "<p>My Counter <button>Up</button> </p> "
+                //this.innerHTML = "<p>My Counter <button>Up</button> </p> "
                 this.attachShadow({mode:"open"})
-                this.shadowRoot.innerHTML = "<p>Hello from <button>Shadow DOM</button></p>"
+                this.shadowRoot.innerHTML = `<p>Counter <span>${this.count}</span> <button>Up</button></p>`
+                this.shadowRoot.querySelector("button").addEventListener("click",() => {
+                    this.count++
+                    console.log(`Counter ${this.count}`)
+                    this.shadowRoot.querySelector("span").innerText = this.count
+                })
             }
         })
     </script>
